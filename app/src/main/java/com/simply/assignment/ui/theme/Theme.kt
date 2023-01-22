@@ -10,8 +10,8 @@ private val colors = lightColors(
 	onPrimary = Color.White,
 	secondary = charcoalGray,
 	onSecondary = grey,
-	background = grey,
-	onBackground = lightGrey,
+	background = light,
+	onBackground = lightestGrey,
 )
 
 @Composable

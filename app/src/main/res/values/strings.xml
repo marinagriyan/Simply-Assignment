@@ -4,4 +4,15 @@
     <string name="vehicle">Vehicle</string>
     <string name="location">Location</string>
     <string name="settings">Settings</string>
+
+    <string name="doors">Doors</string>
+    <string name="engine">Engine</string>
+    <string name="locked">Locked</string>
+    <string name="unlocked">Unlocked</string>
+    <string name="start">Start</string>
+    <string name="stop">Stop</string>
+    <string name="are_you_sure">Are you sure?</string>
+    <string name="confirm_unlock">Please confirm that you want to unlock the doors of "%s".</string>
+    <string name="yes_unlock">Yes, Unlock</string>
+    <string name="cancel">Cancel</string>
 </resources>
