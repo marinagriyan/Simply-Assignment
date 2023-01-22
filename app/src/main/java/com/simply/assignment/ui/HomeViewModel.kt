@@ -2,6 +2,7 @@ package com.simply.assignment.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.simply.assignment.data.DoorsState
 import com.simply.assignment.data.Vehicle
 import com.simply.assignment.data.VehiclesRepository
 import com.simply.assignment.data.VehiclesRepositoryImpl
@@ -28,37 +29,59 @@ class HomeViewModel(private val vehiclesRepository : VehiclesRepository = Vehicl
 					_uiState.value = HomeUIState(error = ex.message)
 				}
 				.collect { vehicles ->
-					_uiState.value = HomeUIState(vehicles)
+					_uiState.value = HomeUIState(vehicles.map { VehicleUIState(it) })
 				}
 		}
 	}
 	
 	fun unlockVehicle(id: Int){
-		changeDoorsState(id, DoorsState.UNLOCKED)
+		viewModelScope.launch {
+			withContext(Dispatchers.IO){
+				setDoorLoadingState(id)
+				changeDoorsState(id, DoorsState.UNLOCKED)
+			}
+		}
 	}
 	
 	fun lockVehicle(id: Int){
-		changeDoorsState(id, DoorsState.LOCKED)
-	}
-	
-	private fun changeDoorsState(id: Int, state: DoorsState){
 		viewModelScope.launch {
 			withContext(Dispatchers.IO){
-				delay(5000)
-				val vehicles = uiState.value.vehicles.map { it.copy() }
-				vehicles.find { it.id == id }?.let {
-					it.doorsState = state
-				}
-				_uiState.value = _uiState.value.copy(
-					vehicles = vehicles
-				)
+				setDoorLoadingState(id)
+				changeDoorsState(id, DoorsState.LOCKED)
 			}
 		}
+	}
 	
+	private fun setDoorLoadingState(id: Int){
+		val vehicles = uiState.value.vehicles.map { it.copy() }
+		vehicles.find { it.vehicle.id == id }?.let {
+			it.isDoorStateUpdating = true
+		}
+		_uiState.value = _uiState.value.copy(
+			vehicles = vehicles
+		)
+	}
+	
+	private suspend fun changeDoorsState(id: Int, state: DoorsState){
+		delay(5000)
+		val vehicles = uiState.value.vehicles.map { it.copy() }
+		vehicles.find { it.vehicle.id == id }?.let {
+			it.isDoorStateUpdating = false
+			it.vehicle.doorsState = state
+		}
+		_uiState.value = _uiState.value.copy(
+			vehicles = vehicles
+		)
 	}
 }
 
 data class HomeUIState(
-	val vehicles: List<Vehicle> = emptyList(),
+	val vehicles: List<VehicleUIState> = emptyList(),
 	val error: String? = null
+)
+
+data class VehicleUIState(
+	val vehicle: Vehicle,
+	var isDoorStateUpdating: Boolean = false,
+	var isEngineStateUpdating: Boolean = false
 )

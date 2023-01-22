@@ -54,26 +54,25 @@ fun HomeScreen(viewModel: HomeViewModel = viewModel()){
 			var selectedVehiclePosition by rememberSaveable{
 				mutableStateOf(0)
 			}
-			val selectedVehicle = vehicles[selectedVehiclePosition]
-			VehicleInfo(vehicle = selectedVehicle)
+			val selected = vehicles[selectedVehiclePosition]
+			VehicleInfo(vehicle = selected.vehicle)
 			Vehicles(
 				vehicles = vehicles,
-				initialPosition = selectedVehiclePosition,
-				onSelectedPosition = { position ->
-					selectedVehiclePosition = position
-				}
-			)
+				initialPosition = selectedVehiclePosition
+			) { position ->
+				selectedVehiclePosition = position
+			}
 			Spacer(modifier = Modifier
 				.fillMaxWidth()
 				.height(8.dp)
 			)
 			VehicleActions(
-				vehicle = selectedVehicle,
+				vehicleUIState = selected,
 				onLock = {
-					viewModel.lockVehicle(selectedVehicle.id)
+					viewModel.lockVehicle(selected.vehicle.id)
 				},
 				onUnlock = {
-					showUnlockVehicleDialog = selectedVehicle
+					showUnlockVehicleDialog = selected.vehicle
 				}
 			)
 		}
@@ -83,7 +82,7 @@ fun HomeScreen(viewModel: HomeViewModel = viewModel()){
 @OptIn(ExperimentalPagerApi::class)
 @Composable
 private fun Vehicles(
-	vehicles: List<Vehicle>,
+	vehicles: List<VehicleUIState>,
 	initialPosition: Int,
 	onSelectedPosition: (Int) -> Unit
 ){
@@ -113,7 +112,7 @@ private fun Vehicles(
 				count = vehicles.size,
 				state = pagerState,
 			){ page ->
-				VehicleImage(vehicles[page])
+				VehicleImage(vehicles[page].vehicle)
 			}
 			Spacer(modifier = Modifier
 				.fillMaxWidth()
@@ -135,7 +134,7 @@ private fun Vehicles(
 
 @Composable
 private fun VehicleActions(
-	vehicle: Vehicle,
+	vehicleUIState: VehicleUIState,
 	onLock: () -> Unit,
 	onUnlock: () -> Unit,
 ) {
@@ -145,15 +144,16 @@ private fun VehicleActions(
 			.padding(16.dp)
 	) {
 		Doors(
-			vehicle = vehicle,
+			vehicle = vehicleUIState.vehicle,
 			modifier = Modifier
 				.weight(1f)
 				.padding(8.dp),
+			isDoorStateUpdating = vehicleUIState.isDoorStateUpdating,
 			onLock = onLock,
 			onUnlock = onUnlock
 		)
 		Engine(
-			vehicle = vehicle,
+			vehicle = vehicleUIState.vehicle,
 			modifier = Modifier
 				.weight(1f)
 				.padding(8.dp),

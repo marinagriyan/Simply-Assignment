@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Card
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -28,13 +29,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.simply.assignment.R
+import com.simply.assignment.data.DoorsState
 import com.simply.assignment.data.Vehicle
-import com.simply.assignment.ui.DoorsState
 
 @Composable
 fun Doors(
 	vehicle: Vehicle,
 	modifier: Modifier = Modifier,
+	isDoorStateUpdating: Boolean = false,
 	onLock: () -> Unit,
 	onUnlock: () -> Unit,
 ){
@@ -50,12 +52,14 @@ fun Doors(
 				DoorButton(
 					icon = R.drawable.ic_act_lock,
 					isSelected = vehicle.doorsState == DoorsState.LOCKED,
+					isLoading = isDoorStateUpdating,
 					onClick = onLock
 				)
 				Spacer(modifier = Modifier.width(8.dp))
 				DoorButton(
 					icon = R.drawable.ic_act_unlock,
 					isSelected = vehicle.doorsState == DoorsState.UNLOCKED,
+					isLoading = isDoorStateUpdating,
 					onClick = onUnlock
 				)
 			}
@@ -67,21 +71,28 @@ fun Doors(
 private fun DoorButton(
 	@DrawableRes icon: Int,
 	isSelected: Boolean,
+	isLoading: Boolean,
 	onClick: () -> Unit
 ){
-	val backgroundColor = if (isSelected) MaterialTheme.colors.primary else MaterialTheme.colors.secondary
-	Box(
-		modifier = Modifier
-			.size(56.dp)
-			.clip(CircleShape)
-			.background(backgroundColor)
-			.clickable { onClick() }
-	){
-		Image(
-			painter = painterResource(id = icon),
-			contentDescription = null,
-			modifier = Modifier.align(Alignment.Center)
+	if (!isSelected && isLoading){
+		CircularProgressIndicator(
+			modifier = Modifier.size(56.dp)
 		)
+	} else {
+		val backgroundColor = if (isSelected && !isLoading) MaterialTheme.colors.primary else MaterialTheme.colors.secondary
+		Box(
+			modifier = Modifier
+				.size(56.dp)
+				.clip(CircleShape)
+				.background(backgroundColor)
+				.clickable { onClick() }
+		) {
+			Image(
+				painter = painterResource(id = icon),
+				contentDescription = null,
+				modifier = Modifier.align(Alignment.Center)
+			)
+		}
 	}
 }
 
